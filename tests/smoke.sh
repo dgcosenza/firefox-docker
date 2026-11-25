@@ -22,6 +22,8 @@ echo "Firefox binary: ${FF_VER}"
 printf '%s' "$FF_VER" | grep -qE 'Mozilla Firefox [0-9]+\.[0-9]+'
 
 # 2. Boot container with Basic Auth enabled and no-new-privileges
+SMOKE_USER="testuser"
+SMOKE_PASS="smoke-$(date +%s)-$$"
 docker run -d --name "$NAME" \
   --security-opt no-new-privileges:true \
   --shm-size 512m \
@@ -29,8 +31,8 @@ docker run -d --name "$NAME" \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Etc/UTC \
-  -e CUSTOM_USER=testuser \
-  -e PASSWORD=ci-smoke-password \
+  -e CUSTOM_USER="$SMOKE_USER" \
+  -e PASSWORD="$SMOKE_PASS" \
   -e CHROME_CLI="about:blank" \
   -v "${TMPCONF}:/config" \
   "$IMAGE"
@@ -57,7 +59,7 @@ if [ "$READY" -ne 1 ]; then
 fi
 
 # 4. Verify authenticated request returns HTTP 200 with noVNC landing page
-AUTH_CODE="$(curl -sk -u 'testuser:ci-smoke-password' -o /dev/null -w '%{http_code}' --max-time 5 https://127.0.0.1:13001/)"
+AUTH_CODE="$(curl -sk -u "${SMOKE_USER}:${SMOKE_PASS}" -o /dev/null -w '%{http_code}' --max-time 5 https://127.0.0.1:13001/)"
 test "$AUTH_CODE" = "200"
 
 # 5. Verify tini PID 1 and non-root abc processes (Xtigervnc, openbox, websockify, nginx worker)

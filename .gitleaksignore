@@ -1,0 +1,3 @@
+# Historical commit 53e04bb used a synthetic placeholder credential in tests/smoke.sh
+# before switching to a runtime-generated ephemeral password.
+53e04bb9c95ff2a28e4c8a42c4737989ca10e49e:tests/smoke.sh:curl-auth-user:60
