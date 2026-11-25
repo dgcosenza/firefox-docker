@@ -1,12 +1,20 @@
 # Firefox Web Desktop — Debian 13 (trixie-slim) Image
 
 [![Daily Firefox image](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml)
+[![Packaging License: MIT](https://img.shields.io/badge/packaging-MIT-blue.svg)](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE)
+[![Upstream License: MPL-2.0](https://img.shields.io/badge/upstream-MPL--2.0-green.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![Signed with Cosign](https://img.shields.io/badge/signed-cosign%20OIDC-blueviolet.svg)](#supply-chain-verification)
+[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-brightgreen.svg)](#supply-chain-verification)
+[![Architectures](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-informational.svg)](#supported-architectures)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dgcosenza/firefox-docker/badge)](https://scorecard.dev/viewer/?uri=github.com/dgcosenza/firefox-docker)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/firefox)](https://hub.docker.com/r/dgcosenza/firefox)
 [![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/firefox/latest)](https://hub.docker.com/r/dgcosenza/firefox)
+[![Latest Release](https://img.shields.io/github/v/release/dgcosenza/firefox-docker?label=version)](https://github.com/dgcosenza/firefox-docker/releases)
 
 A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trixie-slim`)** backed by official Mozilla APT packages, **TigerVNC**, **noVNC**, **Openbox**, and an **HTTPS NGINX** front end, maintained by **Daniel G. Cosenza from FNX Labs**.
 
 - **Docker Hub:** [`dgcosenza/firefox`](https://hub.docker.com/r/dgcosenza/firefox)
+- **GitHub Container Registry (GHCR):** [`ghcr.io/dgcosenza/firefox`](https://github.com/dgcosenza/firefox-docker/pkgs/container/firefox) (identical signed multi-arch digest)
 - **Source Repository:** [`dgcosenza/firefox-docker`](https://github.com/dgcosenza/firefox-docker)
 - **Upstream Application:** Official [Mozilla Firefox](https://www.mozilla.org/firefox/) Debian APT repository (`packages.mozilla.org`, MPL-2.0)
 - **Packaging License:** MIT (see [`LICENSE`](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE) and [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/firefox-docker/blob/main/THIRD-PARTY-NOTICES.md))
@@ -56,10 +64,12 @@ image: dgcosenza/firefox:latest@sha256:<digest>
 
 ## Supported Architectures
 
-| Architecture | Status | Notes |
+| Architecture | Status | Verification |
 | --- | --- | --- |
-| `linux/amd64` | **Published & tested** | Built, smoke-tested, scanned with Trivy and Grype, and published to Docker Hub (`dgcosenza/firefox`). |
+| `linux/amd64` | **Published & natively tested** | Built, smoke-tested, Dive-gated, Syft/Trivy/Grype-scanned, and Cosign-signed on native x86_64 CI runners. |
+| `linux/arm64` | **Published & natively tested** | Built, smoke-tested, Dive-gated, Syft/Trivy/Grype-scanned, and Cosign-signed on native ARM64 CI runners. |
 
+Identical multi-arch OCI manifest digests are published to **Docker Hub** and **GHCR** (`ghcr.io/dgcosenza/*`), accompanied by automated signed [GitHub Releases](https://github.com/dgcosenza/firefox-docker/releases).
 ---
 
 ## Quick Start
@@ -137,6 +147,39 @@ Verifies the local HTTPS reverse proxy on port `3001` responds with HTTP `200`, 
 
 ---
 
+## Supply-Chain Verification
+
+Every published digest (multi-arch index and per-architecture manifests) on both Docker Hub and GHCR is keyless-signed with **Sigstore Cosign** (GitHub OIDC), attested with **SPDX** and **CycloneDX** SBOMs, and backed by **SLSA Build L3** provenance (`actions/attest-build-provenance`).
+
+### Verify image signature with Cosign
+
+```bash
+cosign verify \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/firefox-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/dgcosenza/firefox:latest
+
+# Or against Docker Hub (identical digest):
+cosign verify \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/firefox-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  dgcosenza/firefox:latest
+```
+
+### Verify SPDX / CycloneDX SBOM attestations and SLSA Build Provenance
+
+```bash
+cosign verify-attestation \
+  --type spdxjson \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/firefox-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/dgcosenza/firefox@sha256:<arch-digest>
+
+gh attestation verify oci://ghcr.io/dgcosenza/firefox:latest --owner dgcosenza
+```
+
+---
+
 ## Security
 
 - **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
@@ -193,9 +236,11 @@ docker buildx build \
 
 ---
 
-## License and Credits
+## License
 
-- **Container packaging, entrypoint, CI, and documentation:** [MIT License](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE) — maintained by **Daniel G. Cosenza from FNX Labs**.
-- **Mozilla Firefox:** Mozilla Public License 2.0 ([mozilla.org](https://www.mozilla.org/)).
-- Full third-party notices: [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/firefox-docker/blob/main/THIRD-PARTY-NOTICES.md).
-- Release history: [`CHANGELOG.md`](https://github.com/dgcosenza/firefox-docker/blob/main/CHANGELOG.md).
+This repository follows a clear packaging-vs-upstream license split:
+
+- **Container packaging, scripts, CI workflows, and documentation (`packaging: MIT`):** Licensed under the [MIT License](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE) — copyright **Daniel G. Cosenza from FNX Labs**.
+- **Bundled upstream software — Mozilla Firefox (`packages.mozilla.org`) (`upstream: MPL-2.0`):** Mozilla Firefox is distributed by the Mozilla Foundation under the [Mozilla Public License 2.0 (`MPL-2.0`)](https://www.mozilla.org/en-US/MPL/2.0/).
+
+Full third-party notices are maintained in [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/firefox-docker/blob/main/THIRD-PARTY-NOTICES.md). Release history is maintained in [`CHANGELOG.md`](https://github.com/dgcosenza/firefox-docker/blob/main/CHANGELOG.md).

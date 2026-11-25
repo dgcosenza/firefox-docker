@@ -1,30 +1,38 @@
-# Example Docker Compose configuration for dgcosenza/firefox
-# Pin by @sha256 digest in production and keep PASSWORD in a restricted .env file.
+# Hardened Docker Compose example for dgcosenza/firefox
+# Pin by @sha256 digest in production and keep PASSWORD in a .env or secret file.
+# Available identically on Docker Hub (dgcosenza/firefox) and GHCR (ghcr.io/dgcosenza/firefox).
 
 services:
   firefox:
     image: dgcosenza/firefox:latest
     container_name: firefox
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     security_opt:
       - no-new-privileges:true
       - seccomp:unconfined
     shm_size: "1g"
+    tmpfs:
+      - /tmp:nosuid,size=256m
+      - /run/firefox-web:nosuid,size=32m
     ports:
       - "192.0.2.10:3001:3001"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      - TITLE=Firefox
       - CUSTOM_USER=browser
-      - PASSWORD=${PASSWORD}
+      - PASSWORD=${FIREFOX_PASSWORD}
+      - TITLE=Firefox
       - CHROME_CLI=https://start.duckduckgo.com/
-      - MOZ_USE_XINPUT2=1
     volumes:
       - ./config:/config
-      # Optional GPU acceleration:
-      # - /dev/dri:/dev/dri
     healthcheck:
       test: ["CMD-SHELL", "curl -sk -o /dev/null -w '%{http_code}' --max-time 5 https://127.0.0.1:3001/ | grep -qE '^(200|301|302|401)$$'"]
       interval: 30s
@@ -34,7 +42,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.50"
-          memory: 2048M
-        reservations:
-          memory: 512M
+          cpus: "2.00"
+          memory: 2G
