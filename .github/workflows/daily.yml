@@ -15,7 +15,7 @@ on:
       firefox_version:
         description: 'Override Mozilla APT firefox package version (leave empty for latest official release)'
         required: false
-        default: ''r
+        default: ''
 
 permissions: {}
 
@@ -25,7 +25,7 @@ concurrency:
 
 env:
   IMAGE_NAME: dgcosenza/firefox
-  FIREFOX_VERSION_DEFAULT: '161.0~build1'r
+  FIREFOX_VERSION_DEFAULT: '161.0~build1'
 
 jobs:
   public-check:
@@ -99,7 +99,7 @@ jobs:
       base_digest: ${{ steps.resolve.outputs.base_digest }}
       build_date: ${{ steps.resolve.outputs.build_date }}
       build_date_iso: ${{ steps.resolve.outputs.build_date_iso }}
-      created: ${{ steps.resolve.outputs.created }}r
+      created: ${{ steps.resolve.outputs.created }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,7 +110,7 @@ jobs:
         id: resolve
         shell: bash
         env:
-          INPUT_FF: ${{ inputs.firefox_version }}r
+          INPUT_FF: ${{ inputs.firefox_version }}
         run: |
           set -euo pipefail
 
@@ -152,7 +152,7 @@ jobs:
             echo "build_date=${BUILD_DATE}"
             echo "build_date_iso=${BUILD_DATE_ISO}"
             echo "created=${CREATED}"
-          } >> "$GITHUB_OUTPUT" r
+          } >> "$GITHUB_OUTPUT" 
 
       - name: Upload upstream changes artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -210,7 +210,7 @@ jobs:
             FIREFOX_VERSION=${{ needs.resolve.outputs.firefox_pkg }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}
 
       - name: Inspect OS version and image size
         id: inspect_image
@@ -227,7 +227,7 @@ jobs:
           echo "size_bytes=${SIZE_BYTES}" >> "$GITHUB_OUTPUT"
           echo "size_mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
           EXTRA_VER="$(docker run --rm --entrypoint firefox "$IMG" --version | awk '{print $NF}' | tr -d '\r\n')"
-          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" r
+          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" 
           echo "Detected (${ARCH}): Debian=${DEBIAN_VERSION}, Size=${SIZE_MB} MB (${SIZE_BYTES} bytes)"
           echo "### Image size (${ARCH}): **${SIZE_MB} MB** (${SIZE_BYTES} bytes)" >> "$GITHUB_STEP_SUMMARY"
 
@@ -360,7 +360,7 @@ jobs:
             FIREFOX_VERSION=${{ needs.resolve.outputs.firefox_pkg }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}
 
       - name: Record per-arch metadata
         shell: bash
@@ -650,7 +650,7 @@ jobs:
             --arg upstream_license "MPL-2.0" \
             --arg upstream_version "${{ needs.resolve.outputs.upstream_version }}" \
             --arg upstream_commit "" \
-            --arg ff_actual "$(jq -r '.extra_version // empty' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \\r
+            --arg ff_actual "$(jq -r '.extra_version // empty' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \
             --arg debian_version "${DEBIAN_VER}" \
             --arg base_digest "${{ needs.resolve.outputs.base_digest }}" \
             --arg build_date "${{ needs.resolve.outputs.build_date_iso }}" \
@@ -675,7 +675,7 @@ jobs:
               components: {
                 "Mozilla Firefox": (if $ff_actual != "" then $ff_actual else $upstream_version end),
                 "Web Desktop": "TigerVNC + noVNC + Openbox",
-                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")r
+                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")
               },
               base_image: "debian:trixie-slim",
               base_digest: $base_digest,
@@ -828,4 +828,3 @@ jobs:
           else
             echo "All jobs succeeded and no open ci-failure issue exists."
           fi
-r
