@@ -2,18 +2,23 @@
 
 ARG DEBIAN_BASE=debian:trixie-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0
 ARG FIREFOX_VERSION=161.0~build1
+ARG NOVNC_VERSION=1.7.0
+ARG NOVNC_SHA256=b1003a11b6e6e8d8f7f5e5586daae7f8ca651d8aee0aa155ff9ac841c48f52c6
 
 FROM ${DEBIAN_BASE} AS runtime
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG FIREFOX_VERSION
+ARG NOVNC_VERSION
+ARG NOVNC_SHA256
 ARG BUILD_DATE=unknown
 ARG IMAGE_REVISION=""
 ARG IMAGE_SOURCE="https://github.com/dgcosenza/firefox-docker"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Upgrade Debian 13 (trixie-slim), verify Mozilla's official APT GPG fingerprint,
-# install Firefox + TigerVNC/noVNC/Openbox/NGINX, purge temporary gpg, configure
+# install Firefox + TigerVNC/Openbox/NGINX/websockify + SHA-256-verified static noVNC
+# (avoiding Debian's novnc Node.js dependency tree), purge temporary gpg, configure
 # quiet container defaults, and create the non-root abc account in a single layer.
 RUN set -eux; \
     apt-get update; \
@@ -21,8 +26,17 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
       apache2-utils ca-certificates curl dbus-x11 fonts-noto-color-emoji \
       fonts-noto-core gpg libegl1 libgl1-mesa-dri mesa-va-drivers \
-      nginx-light novnc openbox openssl passwd procps tigervnc-standalone-server \
+      nginx-light openbox openssl passwd procps tigervnc-standalone-server \
       tini tzdata util-linux websockify xclip xdg-utils; \
+    curl -fsSLo /tmp/novnc.tar.gz \
+      "https://github.com/novnc/noVNC/archive/refs/tags/v${NOVNC_VERSION}.tar.gz"; \
+    echo "${NOVNC_SHA256}  /tmp/novnc.tar.gz" | sha256sum -c -; \
+    mkdir -p /tmp/novnc-src /usr/share/novnc; \
+    tar -xzf /tmp/novnc.tar.gz --strip-components=1 -C /tmp/novnc-src; \
+    cp -a /tmp/novnc-src/app /tmp/novnc-src/core /tmp/novnc-src/vendor \
+      /tmp/novnc-src/vnc.html /tmp/novnc-src/vnc_lite.html /tmp/novnc-src/LICENSE.txt \
+      /usr/share/novnc/; \
+    rm -rf /tmp/novnc.tar.gz /tmp/novnc-src; \
     install -d -m 0755 /etc/apt/keyrings; \
     install -d -m 0700 /tmp/gnupg; \
     curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg \
