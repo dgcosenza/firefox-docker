@@ -1,0 +1,201 @@
+# Firefox Web Desktop — Debian 13 (trixie-slim) Image
+
+[![Daily Firefox image](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/firefox)](https://hub.docker.com/r/dgcosenza/firefox)
+[![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/firefox/latest)](https://hub.docker.com/r/dgcosenza/firefox)
+
+A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trixie-slim`)** backed by official Mozilla APT packages, **TigerVNC**, **noVNC**, **Openbox**, and an **HTTPS NGINX** front end, maintained by **Daniel G. Cosenza from FNX Labs**.
+
+- **Docker Hub:** [`dgcosenza/firefox`](https://hub.docker.com/r/dgcosenza/firefox)
+- **Source Repository:** [`dgcosenza/firefox-docker`](https://github.com/dgcosenza/firefox-docker)
+- **Upstream Application:** Official [Mozilla Firefox](https://www.mozilla.org/firefox/) Debian APT repository (`packages.mozilla.org`, MPL-2.0)
+- **Packaging License:** MIT (see [`LICENSE`](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE) and [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/firefox-docker/blob/main/THIRD-PARTY-NOTICES.md))
+
+---
+
+## Overview
+
+`dgcosenza/firefox` runs the latest official **Mozilla Firefox** release (verified against Mozilla's APT GPG signing key) inside a minimal **Debian 13 (`trixie-slim`)** web desktop:
+
+- **Zero Docker-in-Docker bloat:** Omits embedded Docker/containerd daemons, Node.js runtimes, and custom binary blobs, eliminating unnecessary attack surface and Go/npm CVEs.
+- **Drop-in `/config` profile compatibility:** Preserves `HOME=/config`, `/config/.mozilla`, `/config/Desktop`, `/config/Downloads`, `/config/ssl/cert.{pem,key}`, `PUID`/`PGID` (user `abc`), `CUSTOM_USER`/`PASSWORD` HTTP Basic Auth, `CHROME_CLI`, `TITLE`, `/dev/dri` Mesa VAAPI/GL support, HTTP `:3000`, and HTTPS `:3001`.
+- **Hardened & CVE-gated:** Runs with `tini` as PID 1, drops desktop/browser processes (`Xtigervnc`, `openbox`, `firefox`, `websockify`, NGINX workers) to non-root `abc` via `setpriv` (fully compatible with `security_opt: no-new-privileges:true`), binds VNC strictly to `127.0.0.1:5900`, and gates every build on **0 fixable Critical/High** findings in both Trivy and Grype.
+
+---
+
+## Current Versions
+
+<!-- versions:start -->
+| Component | Resolved Version |
+| --- | --- |
+| Mozilla Firefox | `161.0` |
+| Web Desktop | `TigerVNC + noVNC + Openbox` |
+| Base OS | `Debian 13.8 (trixie-slim)` |
+| Last verified build (UTC) | `2026-11-24` |
+| Security gate (Trivy + Grype) | **0 fixable Critical/High** (0 upstream-unfixed) |
+<!-- versions:end -->
+
+---
+
+## Supported Tags
+
+| Tag | Policy | Description |
+| --- | --- | --- |
+| `<version>-<YYYYMMDD>` (e.g. `161.0-20261124`) | **Immutable** | Date-stamped daily rebuild pinning the Firefox release and UTC build date. |
+| `sha-<short>` | **Immutable** | Packaging repository Git commit tag. |
+| `<version>` (e.g. `161.0`) | Moving | Latest verified Debian 13 rebuild of that Firefox release. |
+| `latest` | Moving | Latest verified build tracking the newest official Mozilla Firefox release. |
+
+**Production pinning:** Pin by registry digest:
+
+```yaml
+image: dgcosenza/firefox:latest@sha256:<digest>
+```
+
+---
+
+## Supported Architectures
+
+| Architecture | Status | Notes |
+| --- | --- | --- |
+| `linux/amd64` | **Published & tested** | Built, smoke-tested, scanned with Trivy and Grype, and published to Docker Hub (`dgcosenza/firefox`). |
+
+---
+
+## Quick Start
+
+### `docker run`
+
+```bash
+docker run -d \
+  --name firefox \
+  --restart unless-stopped \
+  --security-opt no-new-privileges:true \
+  --security-opt seccomp:unconfined \
+  --shm-size 1g \
+  -p 192.0.2.10:3001:3001 \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Etc/UTC \
+  -e CUSTOM_USER=browser \
+  -e PASSWORD="replace-with-a-strong-password" \
+  -e CHROME_CLI="https://start.duckduckgo.com/" \
+  -v "$(pwd)/config:/config" \
+  dgcosenza/firefox:latest
+```
+
+### Docker Compose
+
+See [`docker-compose.example.yml`](https://github.com/dgcosenza/firefox-docker/blob/main/docker-compose.example.yml).
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `PUID` | No | `1000` | UID assigned to the non-root `abc` desktop user. |
+| `PGID` | No | `1000` | GID assigned to the non-root `abc` desktop group. |
+| `TZ` | No | `Etc/UTC` | Container timezone (IANA timezone name). |
+| `CUSTOM_USER` | No | `abc` | HTTP Basic Auth username when `PASSWORD` is set. |
+| `PASSWORD` | Recommended | *(unset)* | Enables HTTP Basic Auth (bcrypt) on ports `3000` and `3001` when non-empty. |
+| `TITLE` | No | `Firefox` | HTML page title for the noVNC web client. |
+| `CHROME_CLI` | No | *(unset)* | Optional URL or CLI arguments passed to `firefox --no-remote`. |
+| `SCREEN_WIDTH` / `SCREEN_HEIGHT` / `SCREEN_DEPTH` | No | `1440` / `900` / `24` | Initial virtual display geometry (noVNC dynamically resizes to fit the browser viewport). |
+| `MOZ_USE_XINPUT2` | No | `1` | Enables XInput2 smooth scrolling and touch input in Firefox. |
+| `MOZ_WEBRENDER_DISABLED` | No | *(unset)* | Set to `1` to force software rendering if GPU compositing is undesirable. |
+
+### Volumes, Ports, and UID/GID
+
+| Path / Port | Mode / Owner | Purpose |
+| --- | --- | --- |
+| `/config` | `PUID:PGID` (`abc`) | Persistent `HOME`: `.mozilla/` profile, `Downloads/`, `Desktop/`, `.config/openbox/`, `ssl/cert.{pem,key}`. |
+| `/dev/dri` *(optional)* | Host GPU nodes | Optional bind mount for Mesa DRI/VAAPI acceleration (add host `video` and `render` GIDs via `group_add`). |
+| `3000/tcp` | HTTP | noVNC web interface (prefer reverse proxy or `3001/tcp`). |
+| `3001/tcp` | HTTPS | TLS-encrypted noVNC web interface (probed by the built-in healthcheck). |
+
+---
+
+## Healthcheck
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD ["sh", "-c", "curl -sk -o /dev/null -w '%{http_code}' --max-time 5 https://127.0.0.1:3001/ | grep -qE '^(200|301|302|401)$'"]
+```
+
+Verifies the local HTTPS reverse proxy on port `3001` responds with HTTP `200`, `301`, `302`, or `401` (when Basic Auth is enabled).
+
+---
+
+## Upgrading and Migrating from `lscr.io/linuxserver/firefox`
+
+1. Back up `./config` (especially `./config/.mozilla`) and tag the outgoing image for rollback.
+2. Keep your existing `./config:/config`, `/dev/dri:/dev/dri`, `shm_size: "1g"`, `PUID`/`PGID`, `CUSTOM_USER`, `PASSWORD`, and `CHROME_CLI` settings.
+3. Test side-by-side against a copy of `./config` on non-conflicting loopback ports, verify Basic Auth and profile bookmarks/extensions load cleanly, then pin `image: dgcosenza/firefox:latest@sha256:<digest>` and recreate the container.
+
+---
+
+## Security
+
+- **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+- **Current status:** **0 fixable Critical/High** vulnerabilities across Debian 13 OS packages and official Mozilla Firefox.
+- **Process isolation:** `Xtigervnc` listens strictly on `127.0.0.1:5900` (never exposed directly); external clients connect over TLS on `:3001` behind bcrypt HTTP Basic Auth. Desktop processes run as non-root `abc` via `setpriv` without requiring `sudo` or disabling `no-new-privileges:true`.
+- See [`SECURITY.md`](https://github.com/dgcosenza/firefox-docker/blob/main/SECURITY.md).
+
+---
+
+## Build Locally
+
+```bash
+git clone https://github.com/dgcosenza/firefox-docker.git
+cd firefox-docker
+
+docker buildx build \
+  --platform linux/amd64 \
+  --load \
+  --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --build-arg IMAGE_REVISION="$(git rev-parse HEAD)" \
+  -t dgcosenza/firefox:local \
+  .
+```
+
+| Build Arg | Default | Purpose |
+| --- | --- | --- |
+| `FIREFOX_VERSION` | `161.0~build1` | Official Mozilla Debian APT package version (resolved daily by CI). |
+| `DEBIAN_BASE` | `debian:trixie-slim` | Base OS image. |
+| `BUILD_DATE` | `unknown` | RFC 3339 UTC build timestamp. |
+| `IMAGE_REVISION` | `""` | Packaging repository Git SHA. |
+| `IMAGE_SOURCE` | `https://github.com/dgcosenza/firefox-docker` | Source URL for OCI labels. |
+
+---
+
+## Update Policy
+
+[`.github/workflows/daily.yml`](https://github.com/dgcosenza/firefox-docker/blob/main/.github/workflows/daily.yml) runs automatically every day at **04:39 UTC**, on pushes to `main`, on pull requests (verification only), and via `workflow_dispatch`. Every scheduled run executes a seven-step automated pipeline (gated by `.github/workflows/public-check.yml`):
+
+1. **Upstream check:** Queries Mozilla's official Debian APT feed (`packages.mozilla.org`) for the latest stable Firefox package and resolves the `debian:trixie-slim` digest, diffs against `versions.json`, and emits `upstream-changes.md`.
+2. **No-cache rebuild:** Rebuilds `linux/amd64` with `--no-cache` on schedule, upgrades all Debian 13 packages (`apt-get update && apt-get -y upgrade`), verifies Mozilla's APT GPG fingerprint, installs latest Firefox, and generates an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `high`), diffs findings against the previous scan, and retains reports for 90 days.
+4. **Smoke test:** Executes [`tests/smoke.sh`](https://github.com/dgcosenza/firefox-docker/blob/main/tests/smoke.sh) to verify Firefox version, `tini` PID 1, non-root `abc` desktop processes, Basic Auth enforcement on `:3001` (401 unauthenticated, 200 authenticated), and a negative closed-port healthcheck test.
+5. **Publish:** On non-PR builds when Docker Hub secrets are configured, pushes `latest`, `<version>`, `<version>-<YYYYMMDD>`, and `sha-<short>` tags to Docker Hub and records the immutable digest.
+6. **Automated documentation sync:** Commits updated `versions.json`, the README `Current Versions` block, and a dated `CHANGELOG.md` entry via `github-actions[bot]` with `[skip ci]` when content changes, then syncs the Docker Hub overview via `peter-evans/dockerhub-description`.
+7. **Failure alerting:** On failure, CI opens or updates a single GitHub issue labeled `ci-failure` with the failing job and run link, and auto-closes it on the next green run.
+
+---
+
+## Design Decisions
+
+- **Official Mozilla APT repo on Debian 13 (`trixie-slim`):** Ships current mainstream Mozilla Firefox releases (not Debian ESR) signed with Mozilla's official key while keeping the base OS tracked by Debian 13 Security.
+- **TigerVNC + noVNC + NGINX instead of bundled Docker-in-Docker:** Keeps the entire remote-desktop stack in official Debian 13 packages, eliminating hundreds of megabytes of third-party wheels and Docker-in-Docker Go binaries that introduce avoidable CVEs.
+- **`setpriv` instead of `sudo`:** Drops desktop processes to UID/GID `PUID:PGID` while staying 100% compatible with `security_opt: no-new-privileges:true`.
+
+---
+
+## License and Credits
+
+- **Container packaging, entrypoint, CI, and documentation:** [MIT License](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE) — maintained by **Daniel G. Cosenza from FNX Labs**.
+- **Mozilla Firefox:** Mozilla Public License 2.0 ([mozilla.org](https://www.mozilla.org/)).
+- Full third-party notices: [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/firefox-docker/blob/main/THIRD-PARTY-NOTICES.md).
+- Release history: [`CHANGELOG.md`](https://github.com/dgcosenza/firefox-docker/blob/main/CHANGELOG.md).
