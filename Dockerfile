@@ -24,10 +24,12 @@ RUN set -eux; \
       nginx-light novnc openbox openssl passwd procps tigervnc-standalone-server \
       tini tzdata util-linux websockify xclip xdg-utils; \
     install -d -m 0755 /etc/apt/keyrings; \
+    install -d -m 0700 /tmp/gnupg; \
     curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg \
       -o /etc/apt/keyrings/packages.mozilla.org.asc; \
-    gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc \
-      | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") found=1} END{exit !found}'; \
+    FPR="$(gpg --homedir /tmp/gnupg --show-keys --with-colons /etc/apt/keyrings/packages.mozilla.org.asc | awk -F: '/^fpr:/{print $10; exit}')"; \
+    test "${FPR}" = "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3"; \
+    rm -rf /tmp/gnupg; \
     printf 'Types: deb\nURIs: https://packages.mozilla.org/apt\nSuites: mozilla\nComponents: main\nSigned-By: /etc/apt/keyrings/packages.mozilla.org.asc\n' \
       > /etc/apt/sources.list.d/mozilla.sources; \
     printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' \
