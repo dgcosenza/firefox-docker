@@ -42,8 +42,8 @@ A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trix
 | Architectures | `linux/amd64, linux/arm64` |
 | Uncompressed size (per arch) | `amd64: 369.9 MB, arm64: 997.4 MB` |
 | Last verified build (UTC) | `2026-11-26` |
-| Published multi-arch digest | `dgcosenza/firefox@sha256:a85cc28115a4ca4fbfa1c47b37c49e383b6c5c0bef5c9574b0c628883fe9fc54` |
-| GHCR mirror | `ghcr.io/dgcosenza/firefox@sha256:a85cc28115a4ca4fbfa1c47b37c49e383b6c5c0bef5c9574b0c628883fe9fc54` |
+| Published multi-arch digest | `dgcosenza/firefox@sha256:124b01fec4507d4b4df6b21654565f00930606f9a2e8cb242ac8f835418a41f0` |
+| GHCR mirror | `ghcr.io/dgcosenza/firefox@sha256:124b01fec4507d4b4df6b21654565f00930606f9a2e8cb242ac8f835418a41f0` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
 | Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (46 upstream-unfixed) |
 <!-- versions:end -->
