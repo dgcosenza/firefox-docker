@@ -14,7 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Mai
 - Architectures verified: `linux/amd64, linux/arm64` (native smoke tests + Dive efficiency gate).
 - Upstream status: no new upstream release since previous build; refreshed base OS and dependencies.
 - Vulnerability gate: **0 fixable findings of any severity** in Trivy and Grype (SBOM scan) (46 upstream-unfixed).
-- Published multi-arch digest (Docker Hub + GHCR): `dgcosenza/firefox@sha256:d4479addf68e13674df18c57b3a00dd83581f8f8bda22884e8b81f3b98e109ae` (Cosign OIDC signed + SPDX/CycloneDX SBOM + SLSA L3 provenance).
+- Published multi-arch digest (Docker Hub + GHCR): `dgcosenza/firefox@sha256:4616bd9db2e30f59c9dfd9fc5a52bedd9ca2b64d25f80b57cbe6f7c36f5b444f` (Cosign OIDC signed + SPDX/CycloneDX SBOM + SLSA L3 provenance).
 ---
 
 ## [161.0] — 2026-11-25
