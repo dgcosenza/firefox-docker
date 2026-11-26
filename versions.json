@@ -25,9 +25,9 @@
   "base_digest": "sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0",
   "debian_version": "13.8",
   "build_date": "2026-11-26",
-  "built_at_utc": "2026-11-26T01:38:39Z",
-  "image_digest": "dgcosenza/firefox@sha256:61219b0ef6617892ce4e8d5e3aa7da85c18972cddf2e2d79a1d81f15761261d2",
-  "ghcr_digest": "ghcr.io/dgcosenza/firefox@sha256:61219b0ef6617892ce4e8d5e3aa7da85c18972cddf2e2d79a1d81f15761261d2",
+  "built_at_utc": "2026-11-26T02:01:08Z",
+  "image_digest": "dgcosenza/firefox@sha256:9ede8fcc4e878e71129b020e2b895c608983f55018dbfa6989db956528a75844",
+  "ghcr_digest": "ghcr.io/dgcosenza/firefox@sha256:9ede8fcc4e878e71129b020e2b895c608983f55018dbfa6989db956528a75844",
   "fixable_critical_high": 0,
   "unfixed_cves": [
     "CVE-2022-4055",
