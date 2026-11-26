@@ -27,7 +27,7 @@ A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trix
 
 - **Zero Docker-in-Docker bloat:** Omits embedded Docker/containerd daemons, Node.js runtimes, and custom binary blobs, eliminating unnecessary attack surface and Go/npm CVEs.
 - **Drop-in `/config` profile compatibility:** Preserves `HOME=/config`, `/config/.mozilla`, `/config/Desktop`, `/config/Downloads`, `/config/ssl/cert.{pem,key}`, `PUID`/`PGID` (user `abc`), `CUSTOM_USER`/`PASSWORD` HTTP Basic Auth, `CHROME_CLI`, `TITLE`, `/dev/dri` Mesa VAAPI/GL support, HTTP `:3000`, and HTTPS `:3001`.
-- **Hardened & CVE-gated (all severities with a fix):** Runs with `tini` as PID 1, drops desktop/browser processes (`Xtigervnc`, `openbox`, `firefox`, `websockify`, NGINX workers) to non-root `abc` via `setpriv` (fully compatible with `security_opt: no-new-privileges:true`), binds VNC strictly to `127.0.0.1:5900`, and gates every build on **0 fixable findings of any severity** findings in both Trivy and Grype.
+- **Hardened & CVE-gated (all severities with a fix):** Runs with `tini` as PID 1, drops desktop/browser processes (`Xtigervnc`, `openbox`, `firefox`, `websockify`, NGINX workers) to non-root `abc` via `setpriv` (fully compatible with `security_opt: no-new-privileges:true`), binds VNC strictly to `127.0.0.1:5900`, and gates every build on **0 fixable findings of any severity** in both Trivy and Grype.
 
 ---
 
@@ -188,7 +188,7 @@ gh attestation verify oci://ghcr.io/dgcosenza/firefox:latest --owner dgcosenza
 ## Security
 
 - **Vulnerability scan policy (all severities with a fix):** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `negligible`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-- **Current status:** **0 fixable findings of any severity** vulnerabilities across Debian 13 OS packages and official Mozilla Firefox.
+- **Current status:** **0 fixable vulnerabilities of any severity** across Debian 13 OS packages and official Mozilla Firefox.
 - **Process isolation:** `Xtigervnc` listens strictly on `127.0.0.1:5900` (never exposed directly); external clients connect over TLS on `:3001` behind bcrypt HTTP Basic Auth. Desktop processes run as non-root `abc` via `setpriv` without requiring `sudo` or disabling `no-new-privileges:true`.
 - See [`SECURITY.md`](https://github.com/dgcosenza/firefox-docker/blob/main/SECURITY.md).
 
