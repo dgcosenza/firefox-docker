@@ -27,7 +27,7 @@ A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trix
 
 - **Zero Docker-in-Docker bloat:** Omits embedded Docker/containerd daemons, Node.js runtimes, and custom binary blobs, eliminating unnecessary attack surface and Go/npm CVEs.
 - **Drop-in `/config` profile compatibility:** Preserves `HOME=/config`, `/config/.mozilla`, `/config/Desktop`, `/config/Downloads`, `/config/ssl/cert.{pem,key}`, `PUID`/`PGID` (user `abc`), `CUSTOM_USER`/`PASSWORD` HTTP Basic Auth, `CHROME_CLI`, `TITLE`, `/dev/dri` Mesa VAAPI/GL support, HTTP `:3000`, and HTTPS `:3001`.
-- **Hardened & CVE-gated:** Runs with `tini` as PID 1, drops desktop/browser processes (`Xtigervnc`, `openbox`, `firefox`, `websockify`, NGINX workers) to non-root `abc` via `setpriv` (fully compatible with `security_opt: no-new-privileges:true`), binds VNC strictly to `127.0.0.1:5900`, and gates every build on **0 fixable Critical/High** findings in both Trivy and Grype.
+- **Hardened & CVE-gated (all severities with a fix):** Runs with `tini` as PID 1, drops desktop/browser processes (`Xtigervnc`, `openbox`, `firefox`, `websockify`, NGINX workers) to non-root `abc` via `setpriv` (fully compatible with `security_opt: no-new-privileges:true`), binds VNC strictly to `127.0.0.1:5900`, and gates every build on **0 fixable findings of any severity** findings in both Trivy and Grype.
 
 ---
 
@@ -45,7 +45,7 @@ A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trix
 | Published multi-arch digest | `dgcosenza/firefox@sha256:db728cced62c34c062fc53265ebb892f7c4cf9dbbec8c094664e8d94c3f99dfe` |
 | GHCR mirror | `ghcr.io/dgcosenza/firefox@sha256:db728cced62c34c062fc53265ebb892f7c4cf9dbbec8c094664e8d94c3f99dfe` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
-| Security gate (Trivy + Grype on SBOM) | **0 fixable Critical/High** (46 upstream-unfixed) |
+| Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (46 upstream-unfixed) |
 <!-- versions:end -->
 
 ---
@@ -187,8 +187,8 @@ gh attestation verify oci://ghcr.io/dgcosenza/firefox:latest --owner dgcosenza
 
 ## Security
 
-- **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-- **Current status:** **0 fixable Critical/High** vulnerabilities across Debian 13 OS packages and official Mozilla Firefox.
+- **Vulnerability scan policy (all severities with a fix):** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `negligible`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+- **Current status:** **0 fixable findings of any severity** vulnerabilities across Debian 13 OS packages and official Mozilla Firefox.
 - **Process isolation:** `Xtigervnc` listens strictly on `127.0.0.1:5900` (never exposed directly); external clients connect over TLS on `:3001` behind bcrypt HTTP Basic Auth. Desktop processes run as non-root `abc` via `setpriv` without requiring `sudo` or disabling `no-new-privileges:true`.
 - See [`SECURITY.md`](https://github.com/dgcosenza/firefox-docker/blob/main/SECURITY.md).
 
@@ -225,7 +225,7 @@ docker buildx build \
 
 1. **Upstream check:** Queries Mozilla's official Debian APT feed (`packages.mozilla.org`) for the latest stable Firefox package and resolves the `debian:trixie-slim` digest, diffs against `versions.json`, and emits `upstream-changes.md`.
 2. **No-cache rebuild:** Rebuilds `linux/amd64` with `--no-cache` on schedule, upgrades all Debian 13 packages (`apt-get update && apt-get -y upgrade`), verifies Mozilla's APT GPG fingerprint, installs latest Firefox, and generates an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `high`), diffs findings against the previous scan, and retains reports for 90 days.
+3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `negligible`), diffs findings against the previous scan, and retains reports for 90 days.
 4. **Smoke test:** Executes [`tests/smoke.sh`](https://github.com/dgcosenza/firefox-docker/blob/main/tests/smoke.sh) to verify Firefox version, `tini` PID 1, non-root `abc` desktop processes, Basic Auth enforcement on `:3001` (401 unauthenticated, 200 authenticated), and a negative closed-port healthcheck test.
 5. **Publish:** On non-PR builds when Docker Hub secrets are configured, pushes `latest`, `<version>`, `<version>-<YYYYMMDD>`, and `sha-<short>` tags to Docker Hub and records the immutable digest.
 6. **Automated documentation sync:** Commits updated `versions.json`, the README `Current Versions` block, and a dated `CHANGELOG.md` entry via `github-actions[bot]` with `[skip ci]` when content changes, then syncs the Docker Hub overview via `peter-evans/dockerhub-description`.
