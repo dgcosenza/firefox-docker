@@ -45,7 +45,7 @@ A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trix
 | Published multi-arch digest | `dgcosenza/firefox@sha256:61219b0ef6617892ce4e8d5e3aa7da85c18972cddf2e2d79a1d81f15761261d2` |
 | GHCR mirror | `ghcr.io/dgcosenza/firefox@sha256:61219b0ef6617892ce4e8d5e3aa7da85c18972cddf2e2d79a1d81f15761261d2` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
-| Security gate (Trivy + Grype on SBOM) | **0 fixable Critical/High** (46 upstream-unfixed) |
+| Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (46 upstream-unfixed) |
 <!-- versions:end -->
 
 ---
