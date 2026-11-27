@@ -1,16 +1,33 @@
 # Firefox Web Desktop — Debian 13 (trixie-slim) Image
 
-[![Daily Firefox image](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml)
-[![Packaging License: MIT](https://img.shields.io/badge/packaging-MIT-blue.svg)](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE)
-[![Upstream License: MPL-2.0](https://img.shields.io/badge/upstream-MPL--2.0-green.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
-[![Signed with Cosign](https://img.shields.io/badge/signed-cosign%20OIDC-blueviolet.svg)](#supply-chain-verification)
-[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-brightgreen.svg)](#supply-chain-verification)
-[![Architectures](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-informational.svg)](#supported-architectures)
+[![Daily CI](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml)
+[![OpenSSF Scorecard Workflow](https://github.com/dgcosenza/firefox-docker/actions/workflows/scorecard.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/scorecard.yml)
+[![Gitleaks Secret Scan](https://github.com/dgcosenza/firefox-docker/actions/workflows/gitleaks.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/gitleaks.yml)
+[![Public Content Check](https://github.com/dgcosenza/firefox-docker/actions/workflows/public-check.yml/badge.svg)](https://github.com/dgcosenza/firefox-docker/actions/workflows/public-check.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dgcosenza/firefox-docker/badge)](https://scorecard.dev/viewer/?uri=github.com/dgcosenza/firefox-docker)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/17157/badge)](https://www.bestpractices.dev/projects/17157)
-[![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/firefox)](https://hub.docker.com/r/dgcosenza/firefox)
-[![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/firefox/latest)](https://hub.docker.com/r/dgcosenza/firefox)
-[![Latest Release](https://img.shields.io/github/v/release/dgcosenza/firefox-docker?label=version)](https://github.com/dgcosenza/firefox-docker/releases)
+
+[![Trivy + Grype: 0 Fixable CVEs](https://img.shields.io/badge/Trivy%20%2B%20Grype-0%20fixable%20CVEs-brightgreen?logo=trivy&logoColor=white)](https://github.com/dgcosenza/firefox-docker/security/code-scanning)
+[![Signed: Cosign OIDC](https://img.shields.io/badge/signed-Cosign%20OIDC-blueviolet)](https://github.com/dgcosenza/firefox-docker#supply-chain-verification)
+[![SLSA Build L3](https://img.shields.io/badge/SLSA-Build%20L3-brightgreen)](https://github.com/dgcosenza/firefox-docker/attestations)
+[![SBOM: SPDX + CycloneDX](https://img.shields.io/badge/SBOM-SPDX%20%2B%20CycloneDX-0A7BBB?logo=spdx&logoColor=white)](https://github.com/dgcosenza/firefox-docker/releases/latest)
+[![Base OS](https://img.shields.io/badge/base-Debian%2013%20(trixie--slim)-A81D33?logo=debian&logoColor=white)](https://github.com/dgcosenza/firefox-docker/blob/main/Dockerfile)
+[![Architectures](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-007ec6?logo=linux&logoColor=white)](https://github.com/dgcosenza/firefox-docker#supported-architectures)
+[![Healthcheck: CI Verified](https://img.shields.io/badge/healthcheck-CI%20verified-brightgreen?logo=docker&logoColor=white)](https://github.com/dgcosenza/firefox-docker#healthcheck)
+[![Renovate Enabled](https://img.shields.io/badge/renovate-enabled-1A1F6C?logo=renovate&logoColor=white)](https://github.com/dgcosenza/firefox-docker/blob/main/renovate.json)
+[![Dependabot Enabled](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=dependabot&logoColor=white)](https://github.com/dgcosenza/firefox-docker/blob/main/.github/dependabot.yml)
+[![Daily Rebuilds](https://img.shields.io/badge/rebuilds-daily-2088FF?logo=githubactions&logoColor=white)](https://github.com/dgcosenza/firefox-docker/actions/workflows/daily.yml)
+
+[![Latest Release](https://img.shields.io/github/v/release/dgcosenza/firefox-docker?label=version&logo=github)](https://github.com/dgcosenza/firefox-docker/releases/latest)
+[![Release Date](https://img.shields.io/github/release-date/dgcosenza/firefox-docker?label=released&logo=github)](https://github.com/dgcosenza/firefox-docker/releases/latest)
+[![Last Commit](https://img.shields.io/github/last-commit/dgcosenza/firefox-docker?logo=github)](https://github.com/dgcosenza/firefox-docker/commits/main)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/firefox?logo=docker&logoColor=white)](https://hub.docker.com/r/dgcosenza/firefox)
+[![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/firefox/latest?logo=docker&logoColor=white)](https://hub.docker.com/r/dgcosenza/firefox)
+[![Registries: Docker Hub + GHCR](https://img.shields.io/badge/registries-Docker%20Hub%20%2B%20GHCR-2496ED?logo=docker&logoColor=white)](https://github.com/dgcosenza/firefox-docker/pkgs/container/firefox)
+[![Packaging License: MIT](https://img.shields.io/badge/packaging-MIT-blue?logo=opensourceinitiative&logoColor=white)](https://github.com/dgcosenza/firefox-docker/blob/main/LICENSE)
+[![Upstream License](https://img.shields.io/badge/upstream-MPL--2.0-green?logo=opensourceinitiative&logoColor=white)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![GitHub Issues](https://img.shields.io/github/issues/dgcosenza/firefox-docker?logo=github)](https://github.com/dgcosenza/firefox-docker/issues)
+[![FNX Labs Catalog](https://img.shields.io/badge/catalog-FNX%20Labs-0b1020?logo=githubpages&logoColor=white)](https://dgcosenza.github.io/)
 
 A lean, hardened **Mozilla Firefox** web desktop container on **Debian 13 (`trixie-slim`)** backed by official Mozilla APT packages, **TigerVNC**, **noVNC**, **Openbox**, and an **HTTPS NGINX** front end, maintained by **Daniel G. Cosenza from FNX Labs**.
 
